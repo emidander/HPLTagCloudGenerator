@@ -7,7 +7,6 @@
 //
 
 #import "HPLTagCloudGenerator.h"
-#import "HPLHelpers.h"
 #import <math.h>
 
 @interface HPLTagCloudGenerator () {
@@ -124,8 +123,6 @@
 
         tagLabel.text = tag;
         tagLabel.font = tagFont;
-        tagLabel.backgroundColor = [HPLHelpers colorWithName:clear];
-        tagLabel.textColor = [HPLHelpers colorWithName:white];
 
         while([self checkIntersectionWithView:tagLabel viewArray:tagViews]) {
             CGPoint center = [self getNextPosition];

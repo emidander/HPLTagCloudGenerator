@@ -8,7 +8,7 @@
 #
 Pod::Spec.new do |s|
   s.name         = "HPLTagCloudGenerator"
-  s.version      = "0.0.1"
+  s.version      = "0.0.2"
   s.summary      = "A tool to generate tag clouds on iOS."
   # s.description  = <<-DESC
   #                   An optional longer description of HPLTagCloudGenerator
@@ -49,7 +49,7 @@ Pod::Spec.new do |s|
 
   # Specify the location from where the source should be retrieved.
   #
-  s.source       = { :git => "http://github.com/huffpostlabs/HPLTagCloudGenerator.git", :tag => "0.0.1" }
+  s.source       = { :git => "http://github.com/huffpostlabs/HPLTagCloudGenerator.git", :tag => "0.0.2" }
   # s.source       = { :svn => 'http://EXAMPLE/HPLTagCloudGenerator/tags/1.0.0' }
   # s.source       = { :hg  => 'http://EXAMPLE/HPLTagCloudGenerator', :revision => '1.0.0' }
 

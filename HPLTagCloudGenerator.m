@@ -28,12 +28,12 @@
 
 - (CGPoint) getNextPosition {
 
-    float angle = spiralStep * spiralCount++;
+    float angle = self.spiralStep * spiralCount++;
 
     float offsetX = self.size.width/2;
     float offsetY = self.size.height/2;
-    int x = (a + b*angle)*cos(angle);
-    int y = (a + b*angle)*sin(angle);
+    int x = (self.a + self.b*angle)*cos(angle);
+    int y = (self.a + self.b*angle)*sin(angle);
 
     return CGPointMake(x+offsetX,y+offsetY);
 }

@@ -7,7 +7,7 @@ Create tag clouds on iOS.
 Install from cocoapods:
 
 ```
-pod 'HPLTagCloudGenerator', '~> 0.0.1'
+pod 'HPLTagCloudGenerator', '~> 0.0.3'
 ```
 
 ## Usage
@@ -18,9 +18,9 @@ dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
 
     // dictionary of tags
     NSDictionary *tagDict = @{@"tag1": @3,
-                   @"tag2": @5,
-                   @"tag3": @7,
-                   @"tag4": @2};
+                              @"tag2": @5,
+                              @"tag3": @7,
+                              @"tag4": @2};
 
 
     HPLTagCloudGenerator *tagGenerator = [[HPLTagCloudGenerator alloc] init];

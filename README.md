@@ -1,6 +1,12 @@
 # HPLTagCloudGenerator
 
-Create tag clouds on iOS.
+Create tag clouds on iOS. Algorithm based on http://stackoverflow.com/a/1478314/1454634, using an [Archimedean spiral](http://en.wikipedia.org/wiki/Archimedean_spiral)
+
+### Example
+
+<p align="center">
+  <img src="http://i.imgur.com/SEyh5Yq.png" height="50%" width="auto" />
+</p>
 
 ## Installation
 

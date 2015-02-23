@@ -33,15 +33,17 @@ dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
     tagGenerator.size = CGSizeMake(self.tagView.frame.size.width, self.tagView.frame.size.height);
     tagGenerator.tagDict = tagDict;
 
-    NSArray *views = [tagGenerator generateTagViews];
+    // Generate tags.
+    NSDictionary *tags = [tagGenerator generateTags];
 
     dispatch_async( dispatch_get_main_queue(), ^{
         // This runs in the UI Thread
 
-        for(UIView *v in views) {
-            // Add tags to the view we created it for
-            [self.tagView addSubview:v];
-        }
+        // Add tags to the view we created it for.
+        self.tagLabelViews = [tagGenerator updateViews:self.tagLabelViews inView:self.tagView withTags:tags animate:YES];
+
+        // Calling updateViews again will move existing tags to their new position, as well as create and remove tags as
+        // needed. With animate:YES all label transitions will be animated.
 
     });
 });

@@ -7,6 +7,16 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+
+@interface HPLTagCloudTag : NSObject
++ (HPLTagCloudTag *)tagWithSize:(CGSize)size center:(CGPoint)center scale:(float)scale;
+- (instancetype)initWithSize:(CGSize)size center:(CGPoint)center scale:(float)scale;
+
+@property (nonatomic) CGSize size;
+@property (nonatomic) CGPoint center;
+@property (nonatomic) float scale;
+@end
 
 @interface HPLTagCloudGenerator : NSObject
 
@@ -34,7 +44,10 @@
 @property float b;
 
 
-// Returns an array of views.
-- (NSArray *)generateTagViews;
+// Returns a dictionary with tags. Safe to call from any thread.
+- (NSDictionary *)generateTags;
+
+// Create or update tag views.
+- (NSDictionary *)updateViews:(NSDictionary *)oldViews inView:(UIView *)view withTags:(NSDictionary *)tags animate:(BOOL)animate;
 
 @end

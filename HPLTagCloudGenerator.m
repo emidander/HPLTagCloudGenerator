@@ -9,6 +9,25 @@
 #import "HPLTagCloudGenerator.h"
 #import <math.h>
 
+#define kFontSize 60.0
+
+@implementation HPLTagCloudTag
+
++ (HPLTagCloudTag *)tagWithSize:(CGSize)size center:(CGPoint)center scale:(float)scale {
+  return [[HPLTagCloudTag alloc] initWithSize:size center:(CGPoint)center scale:scale];
+}
+
+- (instancetype)initWithSize:(CGSize)size center:(CGPoint)center scale:(float)scale {
+  if (self = [super init]) {
+    _size = size;
+    _center = center;
+    _scale = scale;
+  }
+  return self;
+}
+
+@end
+
 @interface HPLTagCloudGenerator () {
     int spiralCount;
 }
@@ -38,22 +57,71 @@
     return CGPointMake(x+offsetX,y+offsetY);
 }
 
-- (BOOL) checkIntersectionWithView:(UIView *)checkView viewArray:(NSArray*)viewArray {
-    for (UIView *view in viewArray) {
-        if(CGRectIntersectsRect(checkView.frame, view.frame)) {
+- (BOOL) checkIntersectionWithFrame:(CGRect)checkFrame tagArray:(NSArray*)tagArray {
+    for (HPLTagCloudTag *value in tagArray) {
+        CGRect frame = CGRectMake(value.center.x - value.size.width / 2, value.center.y - value.size.height / 2, value.size.width, value.size.height);
+        if (CGRectIntersectsRect(checkFrame, frame)) {
             return YES;
         }
     }
     return NO;
 }
 
+- (NSDictionary *)updateViews:(NSDictionary *)oldViews inView:(UIView *)view withTags:(NSDictionary *)tags animate:(BOOL)animate {
+  NSMutableDictionary *newViews = [NSMutableDictionary dictionary];
+  for (NSString *tagKey in tags) {
+    HPLTagCloudTag *tag = [tags objectForKey:tagKey];
+    
+    UILabel *label = [oldViews objectForKey:tagKey];
+    
+    if (!label) {
+      label = [[UILabel alloc] initWithFrame:CGRectZero];
+      label.text = tagKey;
+      label.font = [UIFont systemFontOfSize:kFontSize];
+      label.transform = CGAffineTransformMakeScale(0.0, 0.0);
+      label.center = CGPointMake(CGRectGetMidX(view.bounds), CGRectGetMidY(view.bounds));
+      [view addSubview:label];
+    }
 
-- (NSArray *)generateTagViews {
-    float maxFontsize = 60.0;
+    if (animate) {
+      [UIView animateWithDuration:0.5 animations:^{
+        [self setLabelPosition:label tag:tag];
+      }];
+    } else {
+        [self setLabelPosition:label tag:tag];
+    }
+    
+    [newViews setObject:label forKey:tagKey];
+  }
+  
+  for (NSString *tagKey in oldViews) {
+    if (!newViews[tagKey]) {
+      UILabel *oldView = oldViews[tagKey];
+      if (animate) {
+        [UIView animateWithDuration:0.5 animations:^{
+          oldView.transform = CGAffineTransformMakeScale(0.01, 0.01);
+        } completion:^(BOOL finished) {
+          [oldView removeFromSuperview];
+        }];
+      } else {
+        [oldView removeFromSuperview];
+      }
+    }
+  }
+  
+  return newViews;
+}
 
+- (void)setLabelPosition:(UILabel *)label tag:(HPLTagCloudTag *)tag {
+  label.center = tag.center;
+  label.bounds = CGRectMake(0, 0, tag.size.width, tag.size.height);
+  label.transform = CGAffineTransformMakeScale(tag.scale, tag.scale);
+}
+
+- (NSDictionary *)generateTags {
     NSMutableDictionary *smoothedTagDict = [NSMutableDictionary dictionaryWithDictionary:self.tagDict];
 
-    NSMutableArray *tagViews = [[NSMutableArray alloc] init];
+    NSMutableDictionary *tags = [NSMutableDictionary dictionary];
 
     NSArray *sortedTags = [self.tagDict keysSortedByValueUsingComparator:^NSComparisonResult(id obj1, id obj2) {
         int v1 = [obj1 intValue];
@@ -84,7 +152,7 @@
     //
     // so that things look nicer
 
-    for(int i=[sortedTags count]-1; i>0; i--) {
+    for(long i=[sortedTags count]-1; i>0; i--) {
         int curVal = [(NSNumber *) [smoothedTagDict objectForKey:[sortedTags objectAtIndex:i]] intValue];
         int nextVal = [(NSNumber *) [smoothedTagDict objectForKey:[sortedTags objectAtIndex:i-1]] intValue];
 
@@ -98,41 +166,30 @@
     int min = [(NSNumber *) [smoothedTagDict objectForKey:[sortedTags objectAtIndex:[sortedTags count]-1]] intValue];
     min--;
 
-    CGFloat maxWidth = [[UIScreen mainScreen] bounds].size.width - 30;
+    CGFloat maxWidth = [[UIScreen mainScreen] bounds].size.width / 3.0;
+    UIFont *baseFont = [UIFont systemFontOfSize:kFontSize];
 
     for (NSString *tag in sortedTags) {
-
         int count = [(NSNumber *) [smoothedTagDict objectForKey:tag] intValue];
-        float fontSize = ceilf(maxFontsize * (count - min) / (max - min)) + 5;
 
-        UIFont *tagFont = [UIFont systemFontOfSize:fontSize];
-        CGSize size = [tag sizeWithFont:tagFont];
-
-        while (size.width >= maxWidth) {
-            maxFontsize-=2;
-            fontSize = ceilf(maxFontsize * (count - min) / (max - min)) + 5;
-
-            tagFont = [UIFont systemFontOfSize:fontSize];
-            size = [tag sizeWithFont:tagFont];
-        }
-
+        float displayWidth = maxWidth * 0.1 + (maxWidth * 0.9) * (count - min) / (max - min);
+        CGSize unscaledSize = [tag sizeWithAttributes:@{NSFontAttributeName: baseFont}];
+        float scale = displayWidth / unscaledSize.width;
+        float height = displayWidth * (unscaledSize.height / unscaledSize.width);
+      
         // check intersections
         CGPoint center = [self getNextPosition];
-        UILabel *tagLabel = [[UILabel alloc] initWithFrame:CGRectMake(center.x - size.width/2, center.y - size.height/2, size.width, size.height)];
+        CGRect frame = CGRectMake(center.x - displayWidth / 2, center.y - height / 2, displayWidth, height);
 
-
-        tagLabel.text = tag;
-        tagLabel.font = tagFont;
-
-        while([self checkIntersectionWithView:tagLabel viewArray:tagViews]) {
-            CGPoint center = [self getNextPosition];
-            tagLabel.frame = CGRectMake(center.x - size.width/2, center.y - size.height/2, size.width, size.height);
+        while ([self checkIntersectionWithFrame:frame tagArray:[tags allValues]]) {
+            center = [self getNextPosition];
+            frame = CGRectMake(center.x - displayWidth / 2, center.y - height / 2, displayWidth, height);
         }
 
-        [tagViews addObject:tagLabel];
+        [tags setObject:[HPLTagCloudTag tagWithSize:CGSizeMake(unscaledSize.width, unscaledSize.height) center:center scale:scale] forKey:tag];
     }
 
-    return tagViews;
+    return tags;
 }
 
 

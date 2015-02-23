@@ -192,6 +192,20 @@
     return tags;
 }
 
-
+- (NSArray *)generateTagViews {
+  NSDictionary *tags = [self generateTags];
+  NSMutableArray *views = [NSMutableArray arrayWithCapacity:tags.count];
+  for (NSString *tagKey in tags) {
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+    HPLTagCloudTag *tag = tags[tagKey];
+    label.text = tagKey;
+    label.font = [UIFont systemFontOfSize:kFontSize];
+    label.transform = CGAffineTransformMakeScale(tag.scale, tag.scale);
+    label.bounds = CGRectMake(0, 0, tag.size.width, tag.size.height);
+    label.center = tag.center;
+    [views addObject:label];
+  }
+  return [views copy];
+}
 
 @end

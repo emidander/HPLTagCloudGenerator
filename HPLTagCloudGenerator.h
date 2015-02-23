@@ -43,6 +43,8 @@
 @property float a;
 @property float b;
 
+// Returns an array of views.
+- (NSArray *)generateTagViews __attribute__((deprecated));
 
 // Returns a dictionary with tags. Safe to call from any thread.
 - (NSDictionary *)generateTags;
